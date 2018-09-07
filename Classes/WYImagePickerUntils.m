@@ -176,21 +176,31 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             default:
                 size =  CGSizeMake(768.f, 1024.f);
         }
-        PHImageContentMode contentMode = PHImageContentModeAspectFit;
-        PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-        [requestOptions setResizeMode:PHImageRequestOptionsResizeModeExact];
-        [requestOptions setNetworkAccessAllowed:YES];
-        [requestOptions setSynchronous:YES];
-        [[PHImageManager defaultManager] requestImageForAsset:asset
-                                                   targetSize:size
-                                                  contentMode:contentMode
-                                                      options:requestOptions
-                                                resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-                                                    if (handler) {
-                                                        handler(result);
-                                                    }
-                                                }];
+        [self imageForAsset:asset size:size handler:handler];
     }
+}
+
++ (void)originImageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *))handler {
+    if ([self canAccessPhoto] && asset) {
+        [self imageForAsset:asset size:PHImageManagerMaximumSize handler:handler];
+    }
+}
+
++ (void)imageForAsset:(PHAsset *)asset size:(CGSize)size handler:(void (^)(UIImage *))handler {
+    PHImageContentMode contentMode = PHImageContentModeAspectFit;
+    PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+    [requestOptions setResizeMode:PHImageRequestOptionsResizeModeExact];
+    [requestOptions setNetworkAccessAllowed:YES];
+    [requestOptions setSynchronous:YES];
+    [[PHImageManager defaultManager] requestImageForAsset:asset
+                                               targetSize:size
+                                              contentMode:contentMode
+                                                  options:requestOptions
+                                            resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+                                                if (handler) {
+                                                    handler(result);
+                                                }
+                                            }];
 }
 
 //+ (void)livePhotoForAsset:(PHAsset *)asset andSize:(CGSize)size handler:(void (^)(PHLivePhoto *))handler {

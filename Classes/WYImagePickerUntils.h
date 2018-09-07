@@ -36,6 +36,7 @@ typedef NS_OPTIONS(NSInteger, IAAssetType) {
 @interface WYImagePickerUntils (IAPhoto)
 
 + (void)imageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *image))handler;
++ (void)originImageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *image))handler;
 //+ (void)livePhotoForAsset:(PHAsset *)asset andSize:(CGSize)size handler:(void (^)(PHLivePhoto *livePhoto))handler;
 
 @end
