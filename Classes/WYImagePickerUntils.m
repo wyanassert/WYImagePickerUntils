@@ -7,7 +7,7 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
 #pragma mark -
 #pragma mark -
 @implementation WYImagePickerUntils
-    
+
 + (NSArray <PHAssetCollection *> *)fetchAllCollection {
     return [WYImagePickerUntils fetchAllCollectionOfSubType:PHAssetCollectionSubtypeSmartAlbumUserLibrary];
 }
@@ -16,7 +16,7 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
     if (![self canAccessPhoto]) {
         return nil;
     }
-    
+
     NSMutableArray <PHAssetCollection *> *collectionArray = [NSMutableArray array];
     PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:(PHAssetCollectionSubtype)subType options:nil];
     if (smartAlbums.count > 0) {
@@ -31,31 +31,17 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             }
         }];
     }
-    
-    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
-    if (topLevelUserCollections.count > 0) {
-        [topLevelUserCollections enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj isKindOfClass:[PHAssetCollection class]]) {
-                PHAssetCollection *collection = obj;
-                PHFetchResult *assets = [PHAsset fetchAssetsInAssetCollection:collection
-                                                                      options:nil];
-                if (assets.count > 0) {
-                    [collectionArray addObject:collection];
-                }
-            }
-        }];
-    }
-    
+
     return collectionArray;
 }
-    
+
 + (NSArray <PHAsset *> *)fetchAllAsset {
     if (![self canAccessPhoto]) {
         return nil;
     }
-    
+
     NSMutableArray <PHAsset *> *albumAllAssets = [NSMutableArray array];
-    
+
     PHFetchOptions *options = [[PHFetchOptions alloc] init];
     options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate"
                                                               ascending:NO]];
@@ -65,13 +51,13 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             [albumAllAssets addObject:asset];
         }
     }
-    
+
     return albumAllAssets;
 }
 
 + (PHAsset *)fetchFirstAssetForCollection:(PHAssetCollection *)collection {
     if ([self canAccessPhoto] && collection) {
-        
+
         if ([collection isKindOfClass:[PHAssetCollection class]]) {
             PHFetchOptions *options = [[PHFetchOptions alloc] init];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate"
@@ -84,14 +70,14 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
 
         return nil;
     }
-    
+
     return nil;
 }
 
 + (NSArray <PHAsset *>*)fetchAssetForCollection:(PHAssetCollection *)collection {
     if ([self canAccessPhoto] && collection) {
         NSMutableArray <PHAsset *> *albumAssets = [NSMutableArray array];
-        
+
         if ([collection isKindOfClass:[PHAssetCollection class]]) {
             PHFetchOptions *options = [[PHFetchOptions alloc] init];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate"
@@ -99,22 +85,22 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             PHFetchResult *assets = [PHAsset fetchAssetsInAssetCollection:collection options:options];
             if (assets.count > 0) {
                 for (PHAsset *asset in assets) {
-                    if (asset.mediaType == PHAssetMediaTypeImage) {
+                    if (asset.mediaType == PHAssetMediaTypeImage || asset.mediaType == PHAssetMediaTypeVideo) {
                         [albumAssets addObject:asset];
                     }
                 }
             }
         }
-        
+
         return albumAssets;
     }
-    
+
     return nil;
 }
 
 + (IAAssetType)typeForAsset:(PHAsset *)asset {
     PHAssetMediaType type = asset.mediaType;
-    
+
     if (PHAssetMediaTypeVideo == type) {
         return IAAssetTypeVideo;
     } else if (PHAssetMediaTypeImage == type){
@@ -155,7 +141,7 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
     } else if (PHAuthorizationStatusAuthorized != authStatusA) {
         return NO;
     }
-    
+
     return YES;
 }
 
@@ -212,7 +198,7 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
 //        requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
 //        requestOptions.networkAccessAllowed = YES;
 //        [[PHImageManager defaultManager] requestLivePhotoForAsset:asset targetSize:size contentMode:PHImageContentModeAspectFit options:requestOptions resultHandler:^(PHLivePhoto * _Nullable livePhoto, NSDictionary * _Nullable info) {
-//            
+//
 //            if (handler && livePhoto) {
 //                handler(livePhoto);
 //            }
