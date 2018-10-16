@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "WYImagePickerUntils"
-  s.version      = "0.0.2"
+  s.version      = "1.0.3"
   s.summary      = "A short description of WYImagePickerUntils."
 
   # This description is used to generate tags and improve search results.
