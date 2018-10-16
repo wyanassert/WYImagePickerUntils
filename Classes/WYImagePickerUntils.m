@@ -7,15 +7,18 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
 #pragma mark -
 #pragma mark -
 @implementation WYImagePickerUntils
+    
 + (NSArray <PHAssetCollection *> *)fetchAllCollection {
+    return [WYImagePickerUntils fetchAllCollectionOfSubType:PHAssetCollectionSubtypeSmartAlbumUserLibrary];
+}
+
++ (NSArray <PHAssetCollection *> *)fetchAllCollectionOfSubType:(NSUInteger)subType {
     if (![self canAccessPhoto]) {
         return nil;
     }
     
     NSMutableArray <PHAssetCollection *> *collectionArray = [NSMutableArray array];
-    PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-                                                                          subtype:PHAssetCollectionSubtypeSmartAlbumUserLibrary
-                                                                          options:nil];
+    PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:(PHAssetCollectionSubtype)subType options:nil];
     if (smartAlbums.count > 0) {
         [smartAlbums enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:[PHAssetCollection class]]) {
@@ -45,7 +48,7 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
     
     return collectionArray;
 }
-
+    
 + (NSArray <PHAsset *> *)fetchAllAsset {
     if (![self canAccessPhoto]) {
         return nil;

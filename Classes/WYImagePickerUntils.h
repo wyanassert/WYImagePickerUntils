@@ -21,6 +21,7 @@ typedef NS_OPTIONS(NSInteger, IAAssetType) {
 @interface WYImagePickerUntils : NSObject
 
 + (NSArray <PHAssetCollection *> *)fetchAllCollection;
++ (NSArray <PHAssetCollection *> *)fetchAllCollectionOfSubType:(NSInteger)subType;
 + (NSArray <PHAsset *> *)fetchAllAsset;
 + (PHAsset *)fetchFirstAssetForCollection:(PHAssetCollection *)collection;
 + (NSArray <PHAsset *>*)fetchAssetForCollection:(PHAssetCollection *)collection;
