@@ -1,5 +1,5 @@
 #
-#  Be sure to run `pod spec lint WYImagePickerUntils.podspec' to ensure this is a
+#  Be sure to run `pod spec lint WYImagePickerUtils.podspec' to ensure this is a
 #  valid spec and to remove all comments including this before submitting the spec.
 #
 #  To learn more about Podspec attributes see http://docs.cocoapods.org/specification.html
@@ -16,8 +16,8 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "WYImagePickerUntils"
-  s.version      = "1.0.4"
-  s.summary      = "A short description of WYImagePickerUntils."
+  s.version      = "2.0.0"
+  s.summary      = "A short description of WYImagePickerUtils."
 
   # This description is used to generate tags and improve search results.
   #   * Think: What does it do? Why did you write it? What is the focus?
