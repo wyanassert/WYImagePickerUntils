@@ -170,20 +170,23 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             requestOptions.networkAccessAllowed = YES;
             requestOptions.synchronous = YES;
             [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:size contentMode:contentMode options:requestOptions resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (handler) {
-                        handler(result, asset.localIdentifier);
-                    }
-                });
                 if(completeBlock) {
-                    completeBlock(YES, asset.localIdentifier);
+                    completeBlock(YES, asset.localIdentifier, result);
                 }
             }];
         }
     };
     
-    return [[WYSyncTaskManager sharedInstance] addAsyncTaskWithCompletion:asyncBlock taskIdentifier:asset.localIdentifier completeBlock:^(BOOL success, NSString * _Nonnull indexKey) {
-        
+    return [[WYSyncTaskManager sharedInstance] addAsyncTaskWithCompletion:asyncBlock taskIdentifier:[NSString stringWithFormat:@"%@-thumb", asset.localIdentifier] completeBlock:^(BOOL success, NSString * _Nonnull indexKey, id result) {
+        if(success && indexKey.length && [result isKindOfClass:[UIImage class]]) {
+            if(handler) {
+                handler((UIImage *)result, asset.localIdentifier);
+            }
+        } else {
+            if(handler) {
+                handler(nil, asset.localIdentifier);
+            }
+        }
     }];
 }
 
@@ -248,19 +251,22 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
        [requestOptions setNetworkAccessAllowed:YES];
        [requestOptions setSynchronous:YES];
        [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:size contentMode:contentMode options:requestOptions resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-           dispatch_async(dispatch_get_main_queue(), ^{
-               if (handler) {
-                   handler(result, asset.localIdentifier);
-               }
-           });
            if(completeBlock) {
-               completeBlock(YES, asset.localIdentifier);
+               completeBlock(YES, asset.localIdentifier, result);
            }
        }];
     };
     
-    return [[WYSyncTaskManager sharedInstance] addAsyncTaskWithCompletion:asyncBlock taskIdentifier:asset.localIdentifier completeBlock:^(BOOL success, NSString * _Nonnull indexKey) {
-        
+    return [[WYSyncTaskManager sharedInstance] addAsyncTaskWithCompletion:asyncBlock taskIdentifier:[NSString stringWithFormat:@"%@-%d-%d", asset.localIdentifier, (int)size.width, (int)size.height] completeBlock:^(BOOL success, NSString * _Nonnull indexKey, id result) {
+        if(success && indexKey.length && [result isKindOfClass:[UIImage class]]) {
+            if(handler) {
+                handler((UIImage *)result, asset.localIdentifier);
+            }
+        } else {
+            if(handler) {
+                handler(nil, asset.localIdentifier);
+            }
+        }
     }];
 }
 
@@ -305,3 +311,4 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
 }
 
 @end
+
