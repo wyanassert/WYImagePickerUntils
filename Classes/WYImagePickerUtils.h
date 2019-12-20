@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <Photos/PhotosTypes.h>
 
+@class WYSyncToken;
+
 @class PHAsset;
 @class PHAssetCollection;
 @class UIImage;
@@ -9,6 +11,7 @@
 typedef void(^WYCollectionsBlock)(NSArray <PHAssetCollection *> *collections);
 typedef void(^WYAssetsBlock)(NSArray <PHAsset *> *assets);
 typedef void(^WYSingleAssetBlock)(PHAsset *asset);
+typedef void(^WYPickerResultBlock)(UIImage *resultImage, NSString *localIdentifier);
 
 extern NSString *const IAPHAuthorizationStatusNotification;
 
@@ -34,7 +37,8 @@ typedef NS_OPTIONS(NSInteger, IAAssetType) {
 + (void)fetchAssetForCollection:(PHAssetCollection *)collection completion:(WYAssetsBlock)block;
 + (IAAssetType)typeForAsset:(PHAsset *)asset;
 
-+ (void)thumbnailForAsset:(PHAsset *)asset isHighQuality:(BOOL)isHighQuality handler:(void (^)(UIImage *thumbnail))handler;
++ (WYSyncToken *)thumbnailForAsset:(PHAsset *)asset isHighQuality:(BOOL)isHighQuality handler:(WYPickerResultBlock)handler;
++ (void)cancelPickerTask:(WYSyncToken *)token;
 
 @end
 
@@ -43,8 +47,8 @@ typedef NS_OPTIONS(NSInteger, IAAssetType) {
 #pragma mark - IAPhoto
 @interface WYImagePickerUtils (IAPhoto)
 
-+ (void)imageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *image))handler;
-+ (void)originImageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *image))handler;
++ (WYSyncToken *)imageForAsset:(PHAsset *)asset handler:(WYPickerResultBlock)handler;
++ (WYSyncToken *)originImageForAsset:(PHAsset *)asset handler:(WYPickerResultBlock)handler;
 //+ (void)livePhotoForAsset:(PHAsset *)asset andSize:(CGSize)size handler:(void (^)(PHLivePhoto *livePhoto))handler;
 
 @end

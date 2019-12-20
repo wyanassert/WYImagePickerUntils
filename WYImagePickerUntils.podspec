@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "WYImagePickerUntils"
-  s.version      = "2.0.0"
+  s.version      = "2.1.0"
   s.summary      = "A short description of WYImagePickerUtils."
 
   # This description is used to generate tags and improve search results.
@@ -131,5 +131,6 @@ Pod::Spec.new do |s|
 
   # s.xcconfig = { "HEADER_SEARCH_PATHS" => "$(SDKROOT)/usr/include/libxml2" }
   # s.dependency "JSONKit", "~> 1.4"
+  s.dependency "WYUtils", "~> 0.5.6"
 
 end

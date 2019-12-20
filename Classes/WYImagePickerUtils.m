@@ -1,5 +1,6 @@
 #import "WYImagePickerUtils.h"
 #import <Photos/Photos.h>
+#import "WYUtils.h"
 
 NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatusNotification";
 
@@ -159,8 +160,8 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
     }
 }
 
-+ (void)thumbnailForAsset:(PHAsset *)asset isHighQuality:(BOOL)isHighQuality handler:(void (^)(UIImage *thumbnail))handler {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
++ (WYSyncToken *)thumbnailForAsset:(PHAsset *)asset isHighQuality:(BOOL)isHighQuality handler:(WYPickerResultBlock)handler {
+    WYAsyncBlock asyncBlock = ^(WYSyncOperation * __nonnull operation, WYSyncCompletedBlock completeBlock) {
         if ([self canAccessPhoto] && asset) {
             CGSize size = isHighQuality ? CGSizeMake(200.f, 200.f) : CGSizeMake(40.f, 40.f);
             PHImageContentMode contentMode = PHImageContentModeAspectFill;
@@ -168,19 +169,26 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             requestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
             requestOptions.networkAccessAllowed = YES;
             requestOptions.synchronous = YES;
-            [[PHImageManager defaultManager] requestImageForAsset:asset
-                                                       targetSize:size
-                                                      contentMode:contentMode
-                                                          options:requestOptions
-                                                    resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-                                                        dispatch_async(dispatch_get_main_queue(), ^{
-                                                            if (handler) {
-                                                                handler(result);
-                                                            }
-                                                        });
-                                                    }];
+            [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:size contentMode:contentMode options:requestOptions resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (handler) {
+                        handler(result, asset.localIdentifier);
+                    }
+                });
+                if(completeBlock) {
+                    completeBlock(YES, asset.localIdentifier);
+                }
+            }];
         }
-    });
+    };
+    
+    return [[WYSyncTaskManager sharedInstance] addAsyncTaskWithCompletion:asyncBlock taskIdentifier:asset.localIdentifier completeBlock:^(BOOL success, NSString * _Nonnull indexKey) {
+        
+    }];
+}
+
++ (void)cancelPickerTask:(WYSyncToken *)token {
+    [[WYSyncTaskManager sharedInstance] cancelTaskForResource:token];
 }
 
 + (BOOL)canAccessPhoto {
@@ -204,7 +212,7 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
 #pragma mark -
 #pragma mark - IAPhoto
 @implementation WYImagePickerUtils (IAPhoto)
-+ (void)imageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *))handler {
++ (WYSyncToken *)imageForAsset:(PHAsset *)asset handler:(WYPickerResultBlock)handler {
     if ([self canAccessPhoto] && asset) {
         CGSize size;
         switch ((NSInteger)[UIScreen mainScreen].bounds.size.width) {
@@ -218,35 +226,42 @@ NSString *const IAPHAuthorizationStatusNotification = @"kIAPHAuthorizationStatus
             default:
                 size =  CGSizeMake(768.f, 1024.f);
         }
-        [self imageForAsset:asset size:size handler:handler];
+        return [self imageForAsset:asset size:size handler:handler];
+    } else {
+        return nil;
     }
 }
 
-+ (void)originImageForAsset:(PHAsset *)asset handler:(void (^)(UIImage *))handler {
++ (WYSyncToken *)originImageForAsset:(PHAsset *)asset handler:(WYPickerResultBlock)handler {
     if ([self canAccessPhoto] && asset) {
-        [self imageForAsset:asset size:PHImageManagerMaximumSize handler:handler];
+        return [self imageForAsset:asset size:PHImageManagerMaximumSize handler:handler];
+    } else {
+        return nil;
     }
 }
 
-+ (void)imageForAsset:(PHAsset *)asset size:(CGSize)size handler:(void (^)(UIImage *))handler {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        PHImageContentMode contentMode = PHImageContentModeAspectFit;
-        PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-        [requestOptions setResizeMode:PHImageRequestOptionsResizeModeExact];
-        [requestOptions setNetworkAccessAllowed:YES];
-        [requestOptions setSynchronous:YES];
-        [[PHImageManager defaultManager] requestImageForAsset:asset
-                                                   targetSize:size
-                                                  contentMode:contentMode
-                                                      options:requestOptions
-                                                resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-                                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                                        if (handler) {
-                                                            handler(result);
-                                                        }
-                                                    });
-                                                }];
-    });
++ (WYSyncToken *)imageForAsset:(PHAsset *)asset size:(CGSize)size handler:(WYPickerResultBlock)handler {
+    WYAsyncBlock asyncBlock = ^(WYSyncOperation * __nonnull operation, WYSyncCompletedBlock completeBlock) {
+       PHImageContentMode contentMode = PHImageContentModeAspectFit;
+       PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+       [requestOptions setResizeMode:PHImageRequestOptionsResizeModeExact];
+       [requestOptions setNetworkAccessAllowed:YES];
+       [requestOptions setSynchronous:YES];
+       [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:size contentMode:contentMode options:requestOptions resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+           dispatch_async(dispatch_get_main_queue(), ^{
+               if (handler) {
+                   handler(result, asset.localIdentifier);
+               }
+           });
+           if(completeBlock) {
+               completeBlock(YES, asset.localIdentifier);
+           }
+       }];
+    };
+    
+    return [[WYSyncTaskManager sharedInstance] addAsyncTaskWithCompletion:asyncBlock taskIdentifier:asset.localIdentifier completeBlock:^(BOOL success, NSString * _Nonnull indexKey) {
+        
+    }];
 }
 
 //+ (void)livePhotoForAsset:(PHAsset *)asset andSize:(CGSize)size handler:(void (^)(PHLivePhoto *))handler {
